@@ -24,3 +24,21 @@ The service provides HTTP endpoints for rolling dice and collects telemetry data
 - Grafana Cloud account and credentials
 
 ## Installation
+Provide following environment variables in makefile:
+- GRAFANA_ENDPOINT
+- GRAFANA_USERNAME
+- GRAFANA_PASSWORD
+
+## Usage
+
+```bash
+make <target>
+```
+
+## Cleanup
+
+```bash
+make clean
+```
+
+
