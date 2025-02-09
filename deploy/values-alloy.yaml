@@ -2,6 +2,7 @@ alloy:
   extraEnv:
     - name: GRAFANA_ENDPOINT
       value: "https://otlp-gateway-prod-eu-west-2.grafana.net/otlp"
+
   extraPorts:
     - name: otlp-grpc
       targetPort: 4317
@@ -12,7 +13,6 @@ alloy:
       targetPort: 4318
       port: 4318
       protocol: TCP
-
   configMap:
     create: true
     content: |

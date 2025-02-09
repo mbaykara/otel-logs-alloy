@@ -2,7 +2,7 @@
 CLUSTER_NAME = dice-cluster
 APP_NAME = dice-app
 IMAGE_TAG = v1
-GRAFANA_ENDPOINT = https://otlp-gateway-prod-eu-west-2.grafana.net/otlp
+GRAFANA_ENDPOINT = htt/otlp
 GRAFANA_USERNAME = ""
 GRAFANA_PASSWORD = "=="
 
@@ -33,10 +33,14 @@ load:
 	@echo "Loading image into Kind cluster..."
 	kind load docker-image $(APP_NAME):$(IMAGE_TAG) --name $(CLUSTER_NAME)
 
-.PHONY: deploy
-deploy:
+.PHONY: deploy-alloy
+deploy-alloy:
 	@echo "Deploying to cluster..."
 	helm install alloy-service -f deploy/values-alloy.yaml grafana/alloy --namespace o11y --create-namespace
+
+.PHONY: deploy-dice
+deploy-dice:
+	@echo "Deploying to cluster..."
 	kubectl apply -f deploy/deployment.yaml --namespace o11y
 
 .PHONY: clean
