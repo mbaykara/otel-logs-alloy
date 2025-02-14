@@ -1,10 +1,10 @@
 # Variables
 CLUSTER_NAME = dice-cluster
 APP_NAME = dice-app
-IMAGE_TAG = v1
+IMAGE_TAG = v2
 GRAFANA_ENDPOINT = htt/otlp
 GRAFANA_USERNAME = ""
-GRAFANA_PASSWORD = "=="
+GRAFANA_PASSWORD = ""
 
 .PHONY: all
 all: cluster build load deploy
@@ -37,6 +37,11 @@ load:
 deploy-alloy:
 	@echo "Deploying to cluster..."
 	helm install alloy-service -f deploy/values-alloy.yaml grafana/alloy --namespace o11y --create-namespace
+
+.PHONY: rm-alloy	
+rm-alloy:
+	@echo "Removing alloy service..."
+	helm delete alloy-service --namespace o11y
 
 .PHONY: deploy-dice
 deploy-dice:

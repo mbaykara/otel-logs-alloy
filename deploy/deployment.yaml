@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: dice-app
+  name: dice-app-backend
   namespace: o11y
 spec:
   replicas: 1
@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: dice-app
-        image: dice-app:v1
+        image: dice-app:v2
         ports:
         - containerPort: 8080
           name: http
@@ -27,7 +27,47 @@ spec:
         - name: OTEL_EXPORTER_OTLP_ENDPOINT
           value: "alloy-service:4317"
         - name: OTEL_EXPORTER_OTLP_HTTP_ENDPOINT
-          value: "http://localhost/otlp/v1/logs"
+          value: "http://localhost/otlp"
+        - name: TEAM
+          value: "backend"
+        - name: PRIO
+          value: "low"
+# ---
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: dice-app-frontend
+#   namespace: o11y
+# spec:
+#   replicas: 1
+#   selector:
+#     matchLabels:
+#       app: frontend
+#   template:
+#     metadata:
+#       labels:
+#         app: frontend
+#     spec:
+#       containers:
+#       - name: frontend
+#         image: dice-app:v2
+#         ports:
+#         - containerPort: 8080
+#           name: http
+#         - containerPort: 4317
+#           name: otlp-grpc
+#         - containerPort: 4318
+#           name: otlp-http
+#         env:
+#         - name: OTEL_EXPORTER_OTLP_ENDPOINT
+#           value: "alloy-service:4317"
+#         - name: OTEL_EXPORTER_OTLP_HTTP_ENDPOINT
+#           value: "http://localhost/otlp"
+#         - name: TEAM
+#           value: "frontend"
+#         - name: PRIO
+#           value: "low"
+
 ---
 apiVersion: v1
 kind: Service
@@ -41,6 +81,19 @@ spec:
   - port: 8080
     targetPort: 8080
     name: http
+# ---
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: frontend
+#   namespace: o11y
+# spec:
+#   selector:
+#     app: frontend
+#   ports:
+#   - port: 8080
+#     targetPort: 8080
+#     name: http
 
 ---
 apiVersion: networking.k8s.io/v1
@@ -60,6 +113,7 @@ spec:
             name: dice-app
             port:
               number: 8080
+
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress

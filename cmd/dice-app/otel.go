@@ -32,6 +32,8 @@ func InitProvider(serverName string) func() {
 	logres := resource.NewWithAttributes(
 		semconv.SchemaURL,
 		semconv.ServiceNameKey.String(serverName),
+		attribute.String("team", os.Getenv("TEAM")),
+		attribute.String("prio", os.Getenv("PRIO")),
 	)
 	res, err := resource.New(ctx,
 		resource.WithFromEnv(),
@@ -39,9 +41,10 @@ func InitProvider(serverName string) func() {
 		resource.WithTelemetrySDK(),
 		resource.WithHost(),
 		resource.WithAttributes(
-			// the service name used to display traces in backends
 			semconv.ServiceNameKey.String(serverName),
 			attribute.String("environment", os.Getenv("go_env")),
+			attribute.String("team", os.Getenv("TEAM")),
+			attribute.String("prio", os.Getenv("PRIO")),
 		),
 	)
 	HandleErr(err, "failed to create resource")

@@ -32,8 +32,8 @@ alloy:
 
         output {
           metrics = [otelcol.processor.batch.default.input]
-          logs    = [otelcol.processor.batch.default.input]
-          traces  = [otelcol.processor.batch.default.input]
+          logs    = [otelcol.processor.filter.filter_attributes.input]
+          traces  = [otelcol.processor.batch.default.input, otelcol.connector.host_info.default.input]
         }
       }
 
@@ -54,6 +54,20 @@ alloy:
         }
       }
 
+
+      otelcol.processor.filter "filter_attributes" {
+      //will drop log line that not contains label
+        logs {
+          log_record = [
+            `IsMatch(resource.attributes["team"], ".*.*")`,
+          ]
+        }
+
+        output {
+          logs = [otelcol.processor.batch.default.input]
+        }
+      }
+
       otelcol.exporter.otlphttp "grafana_cloud" {
         client {
           endpoint = sys.env("GRAFANA_ENDPOINT")
@@ -70,7 +84,6 @@ alloy:
         namespace = coalesce(sys.env("NAMESPACE"), "o11y")
         name = coalesce(sys.env("GCLOUD_CREDENTIALS"), "gcloud-creds")
       }
-
 volumes:
   - name: alloy-logs
     emptyDir: {}
