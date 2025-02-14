@@ -59,7 +59,7 @@ alloy:
       //will drop log line that not contains label
         logs {
           log_record = [
-            `IsMatch(resource.attributes["team"], ".*.*")`,
+            `not IsMatch(resource.attributes["team"], ".*.*")`,
           ]
         }
 
