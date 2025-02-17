@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: dice-app
-        image: dice-app:v2
+        image: dice-app:v3
         ports:
         - containerPort: 8080
           name: http
@@ -30,8 +30,6 @@ spec:
           value: "http://localhost/otlp"
         - name: TEAM
           value: "backend"
-        - name: PRIO
-          value: "low"
 # ---
 # apiVersion: apps/v1
 # kind: Deployment
