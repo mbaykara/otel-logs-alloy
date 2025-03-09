@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: dice-app
-        image: dice-app:v3
+        image: dice-app:v4
         ports:
         - containerPort: 8080
           name: http
@@ -30,41 +30,8 @@ spec:
           value: "http://localhost/otlp"
         - name: TEAM
           value: "backend"
-# ---
-# apiVersion: apps/v1
-# kind: Deployment
-# metadata:
-#   name: dice-app-frontend
-#   namespace: o11y
-# spec:
-#   replicas: 1
-#   selector:
-#     matchLabels:
-#       app: frontend
-#   template:
-#     metadata:
-#       labels:
-#         app: frontend
-#     spec:
-#       containers:
-#       - name: frontend
-#         image: dice-app:v2
-#         ports:
-#         - containerPort: 8080
-#           name: http
-#         - containerPort: 4317
-#           name: otlp-grpc
-#         - containerPort: 4318
-#           name: otlp-http
-#         env:
-#         - name: OTEL_EXPORTER_OTLP_ENDPOINT
-#           value: "alloy-service:4317"
-#         - name: OTEL_EXPORTER_OTLP_HTTP_ENDPOINT
-#           value: "http://localhost/otlp"
-#         - name: TEAM
-#           value: "frontend"
-#         - name: PRIO
-#           value: "low"
+        - name: PRIO
+          value: "high"
 
 ---
 apiVersion: v1
@@ -79,19 +46,28 @@ spec:
   - port: 8080
     targetPort: 8080
     name: http
-# ---
-# apiVersion: v1
-# kind: Service
-# metadata:
-#   name: frontend
-#   namespace: o11y
-# spec:
-#   selector:
-#     app: frontend
-#   ports:
-#   - port: 8080
-#     targetPort: 8080
-#     name: http
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/component: networking
+    app.kubernetes.io/instance: alloy-service
+  name: alloy-service-grpc
+  namespace: o11y
+spec:
+  ports:
+  - appProtocol: h2c
+    name: otlp-grpc
+    port: 4317
+    protocol: TCP
+    targetPort: 4317
+  selector:
+    app.kubernetes.io/instance: alloy-service
+    app.kubernetes.io/name: alloy
+  type: ClusterIP
+
+
 
 ---
 apiVersion: networking.k8s.io/v1
@@ -116,7 +92,7 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: alloy-ingress
+  name: alloy-ingress-http
   namespace: o11y
 spec:
   ingressClassName: nginx
@@ -130,3 +106,25 @@ spec:
             name: alloy-service
             port:
               number: 4318
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: alloy-ingress-grpc
+  namespace: o11y
+  annotations:
+    nginx.ingress.kubernetes.io/backend-protocol: "GRPC"
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+spec:
+  ingressClassName: nginx
+  rules:
+  - http:
+      paths:
+      - path: /grpc
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: alloy-service-grpc
+            port:
+              number: 4317
